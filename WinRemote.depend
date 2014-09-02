@@ -1,0 +1,15 @@
+# depslib dependency file v1.0
+1409698274 source:d:\google drive\sync\dropbox\programming\c_and_c++\windows\winremote\main.cpp
+	<iostream>
+	<iomanip>
+	<cstring>
+	<windows.h>
+	<tcpipwin32.h>
+
+1409691314 source:d:\google drive\sync\dropbox\programming\c_and_c++\windows\winremote\tcpipwin32.cpp
+	"tcpipwin32.h"
+
+1409691332 d:\google drive\sync\dropbox\programming\c_and_c++\windows\winremote\tcpipwin32.h
+	<winsock.h>
+	<windows.h>
+
