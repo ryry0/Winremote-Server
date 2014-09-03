@@ -12,6 +12,11 @@
 const int DEFAULT_PORT = 25525;
 
 char ConvertKey(const char key);
+void SendVirtualKeyTap(INPUT &input);
+void SendVirtualKeyHold(INPUT &input);
+void SendVirtualKeyUp(INPUT &input);
+void SendVirtualKeyChord(char first_key, char second_key, INPUT &input);
+void SendUnicodeCharacter(char key, INPUT &input);
 
 int main(int argc, char ** argv) {
   INPUT remote_user_input;
@@ -47,32 +52,82 @@ int main(int argc, char ** argv) {
 
   //cout the keys
   while (key_received != 0x03) {
-    tcp_connection.recieveData(tcp_socket, (char *) &key_received,
+    tcp_connection.receiveData(tcp_socket, (char *) &key_received,
         sizeof(key_received));
 
     std::cout << std::hex << (int)key_received << std::endl;
 
-    if (key_received == 0x7f) { //send a virtual keyboard code
-      remote_user_input.ki.dwFlags = 0; 
-      remote_user_input.ki.wVk = VK_BACK;
-      remote_user_input.ki.wScan = 0; //hardware scan code
-      SendInput(1, &remote_user_input, sizeof(INPUT)); //send a key press
-
-      remote_user_input.ki.dwFlags = KEYEVENTF_KEYUP; 
-      SendInput(1, &remote_user_input, sizeof(INPUT)); //send a key up signal
+    if (key_received == 0x08) { //ctrl-backspace
+      SendVirtualKeyChord(VK_CONTROL, VK_BACK, remote_user_input);
     }
-    else { //send a unicode event
-      remote_user_input.ki.dwFlags = KEYEVENTF_UNICODE; 
-      remote_user_input.ki.wVk = 0;
-      remote_user_input.ki.wScan = key_received; //hardware scan code
-      SendInput(1, &remote_user_input, sizeof(INPUT)); //send a key press
+    else if (key_received == 0x06) { //ctrl f
+      SendVirtualKeyChord(VK_CONTROL, 'F', remote_user_input);
     }
-
-    //remote_user_input.ki.dwFlags = KEYEVENTF_KEYUP; //send a key release
-    //SendInput(1, &remote_user_input, sizeof(INPUT));
+    else if (key_received == 0x10){ //ctrl p
+      SendVirtualKeyChord(VK_CONTROL, 'P', remote_user_input);
+    }
+    else if (key_received == 0x0E){ //ctrl n
+      SendVirtualKeyChord(VK_CONTROL, 'N', remote_user_input);
+    }
+    else if (key_received == 0x17) { //ctrl w
+      SendVirtualKeyChord(VK_CONTROL, 'W', remote_user_input);
+    }
+    else if (key_received == 0x14) { //ctrl t
+      SendVirtualKeyChord(VK_CONTROL, 'T', remote_user_input);
+    }
+    else if (key_received == 0x0c) { //ctrl l
+      SendVirtualKeyChord(VK_CONTROL, 'L', remote_user_input);
+    }
+    else if (isupper(key_received)) { //all uppercase characters
+      SendVirtualKeyChord(VK_SHIFT, ConvertKey(key_received),
+          remote_user_input);
+    }
+    else if (isdigit(key_received) || ispunct(key_received)) { //punctuation
+      SendUnicodeCharacter(key_received, remote_user_input);
+    }
+    else {
+      remote_user_input.ki.wVk = ConvertKey(key_received);
+      SendVirtualKeyTap(remote_user_input);
+    }
   }
 
   return 0;
+}
+
+void SendUnicodeCharacter(char key, INPUT &input) {
+  input.ki.dwFlags = KEYEVENTF_UNICODE;
+  input.ki.wScan = key;
+  input.ki.wVk = 0;
+  input.ki.dwExtraInfo = 0;
+  SendInput(1, &input, sizeof(INPUT)); //send a key press
+}
+
+void SendVirtualKeyChord(char first_key, char second_key, INPUT &input) {
+  input.ki.wVk = first_key; //press them
+  SendVirtualKeyHold(input);
+  input.ki.wVk = second_key;
+  SendVirtualKeyHold(input);
+
+  input.ki.wVk = second_key; //release them
+  SendVirtualKeyUp(input);
+  input.ki.wVk = first_key;
+  SendVirtualKeyUp(input);
+}
+
+void SendVirtualKeyTap(INPUT &input) {
+  SendVirtualKeyHold(input);
+  SendVirtualKeyUp(input);
+}
+
+void SendVirtualKeyHold(INPUT &input) {
+      input.ki.dwFlags = 0;
+      input.ki.wScan = 0; //hardware scan code
+      SendInput(1, &input, sizeof(INPUT)); //send a key press
+}
+
+void SendVirtualKeyUp(INPUT &input) {
+      input.ki.dwFlags = KEYEVENTF_KEYUP;
+      SendInput(1, &input, sizeof(INPUT)); //send a key up signal
 }
 
 char ConvertKey(const char key) {
@@ -84,11 +139,17 @@ char ConvertKey(const char key) {
     case 0x33:
       converted_key = VK_DELETE;
       break;
+    case 0x09:
+      converted_key = VK_TAB;
+      break;
     case 0x7f:
       converted_key = VK_BACK;
       break;
     case 0x0a:
       converted_key = VK_RETURN;
+      break;
+    case 0x12:
+      converted_key = VK_LWIN;
       break;
     case 0x1b:
       converted_key = VK_ESCAPE;
@@ -100,4 +161,5 @@ char ConvertKey(const char key) {
         converted_key = 0x97;
       break;
   }
+  return converted_key;
 }
