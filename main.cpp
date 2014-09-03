@@ -46,50 +46,63 @@ int main(int argc, char ** argv) {
 
   //listen and accept an incoming connection
   if (tcp_connection.listenToPort(port)) {
-    tcp_socket = tcp_connection.acceptConnection();
-    std::cout << "Connection accepted!\n";
+    tcp_socket = tcp_connection.acceptConnection(); std::cout << "Connection accepted!\n";
   }
 
   //cout the keys
-  while (key_received != 0x03) {
-    tcp_connection.receiveData(tcp_socket, (char *) &key_received,
-        sizeof(key_received));
+  while (key_received != 0x04) {
+    if (tcp_connection.receiveData(tcp_socket, (char *) &key_received,
+        sizeof(key_received))) {
 
-    std::cout << std::hex << (int)key_received << std::endl;
+      std::cout << std::hex << (int)key_received << std::endl;
 
-    if (key_received == 0x08) { //ctrl-backspace
-      SendVirtualKeyChord(VK_CONTROL, VK_BACK, remote_user_input);
-    }
-    else if (key_received == 0x06) { //ctrl f
-      SendVirtualKeyChord(VK_CONTROL, 'F', remote_user_input);
-    }
-    else if (key_received == 0x10){ //ctrl p
-      SendVirtualKeyChord(VK_CONTROL, 'P', remote_user_input);
-    }
-    else if (key_received == 0x0E){ //ctrl n
-      SendVirtualKeyChord(VK_CONTROL, 'N', remote_user_input);
-    }
-    else if (key_received == 0x17) { //ctrl w
-      SendVirtualKeyChord(VK_CONTROL, 'W', remote_user_input);
-    }
-    else if (key_received == 0x14) { //ctrl t
-      SendVirtualKeyChord(VK_CONTROL, 'T', remote_user_input);
-    }
-    else if (key_received == 0x0c) { //ctrl l
-      SendVirtualKeyChord(VK_CONTROL, 'L', remote_user_input);
-    }
-    else if (isupper(key_received)) { //all uppercase characters
-      SendVirtualKeyChord(VK_SHIFT, ConvertKey(key_received),
-          remote_user_input);
-    }
-    else if (isdigit(key_received) || ispunct(key_received)) { //punctuation
-      SendUnicodeCharacter(key_received, remote_user_input);
-    }
-    else {
-      remote_user_input.ki.wVk = ConvertKey(key_received);
-      SendVirtualKeyTap(remote_user_input);
-    }
-  }
+      if (key_received == 0x08) { //ctrl-backspace
+        SendVirtualKeyChord(VK_CONTROL, VK_BACK, remote_user_input);
+      }
+      else if (key_received == 0x06) { //ctrl f
+        SendVirtualKeyChord(VK_CONTROL, 'F', remote_user_input);
+      }
+      else if (key_received == 0x10){ //ctrl p
+        SendVirtualKeyChord(VK_CONTROL, 'P', remote_user_input);
+      }
+      else if (key_received == 0x0E){ //ctrl n
+        SendVirtualKeyChord(VK_CONTROL, 'N', remote_user_input);
+      }
+      else if (key_received == 0x17) { //ctrl w
+        SendVirtualKeyChord(VK_CONTROL, 'W', remote_user_input);
+      }
+      else if (key_received == 0x14) { //ctrl t
+        SendVirtualKeyChord(VK_CONTROL, 'T', remote_user_input);
+      }
+      else if (key_received == 0x0c) { //ctrl l
+        SendVirtualKeyChord(VK_CONTROL, 'L', remote_user_input);
+      }
+      else if (key_received == 0x18) { //ctrl x
+        SendVirtualKeyChord(VK_CONTROL, 'X', remote_user_input);
+      }
+      else if (key_received == 0x16) { //ctrl v
+        SendVirtualKeyChord(VK_CONTROL, 'V', remote_user_input);
+      }
+      else if (key_received == 0x15) { //ctrl u mapped to ctrl-z
+        SendVirtualKeyChord(VK_CONTROL, 'Z', remote_user_input);
+      }
+      else if (key_received == 0x19) { //ctrl y mapped to ctrl-c
+        SendVirtualKeyChord(VK_CONTROL, 'C', remote_user_input);
+      }
+      else if (isupper(key_received)) { //all uppercase characters
+        SendVirtualKeyChord(VK_SHIFT, ConvertKey(key_received),
+            remote_user_input); }
+      else if (isdigit(key_received) || ispunct(key_received)) { //punctuation
+        SendUnicodeCharacter(key_received, remote_user_input);
+      }
+      else {
+        remote_user_input.ki.wVk = ConvertKey(key_received);
+        SendVirtualKeyTap(remote_user_input);
+      } //end else
+    } //end if
+    else
+      break;
+  } //end while
 
   return 0;
 }
