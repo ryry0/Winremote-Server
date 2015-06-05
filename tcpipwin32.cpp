@@ -57,7 +57,7 @@ bool TCP::connectToHost(const int PortNo, const char* IPAddress)
 
 }
 
-bool TCP::listenToPort(const int PortNo)
+int TCP::listenToPort(const int PortNo)
 {
     WSADATA wsadata;
     int error = WSAStartup(SCK_VERSION2, &wsadata);
@@ -112,7 +112,7 @@ int TCP::sendData(SOCKET writeTo, char * data, const int len)
     return send(writeTo, data, len, 0);
 }
 
-int TCP::recieveData(SOCKET readFrom, char * buffer, const int len)
+int TCP::receiveData(SOCKET readFrom, char * buffer, const int len)
 {
     return recv(readFrom, buffer, len, 0);
 }
@@ -134,7 +134,7 @@ int TCP::sendFramedData(SOCKET writeTo, char* data, const int len)
 }
 
 
-int TCP::recieveFramedData(SOCKET readFrom, char * data)
+int TCP::receiveFramedData(SOCKET readFrom, char * data)
 {
     char lenBuff[4];
     char * dataBuff;
@@ -143,12 +143,12 @@ int TCP::recieveFramedData(SOCKET readFrom, char * data)
     int currentRead;
 
     //priming read:
-    currentRead = totalRead = this->recieveData(readFrom, lenBuff, 4);
+    currentRead = totalRead = this->receiveData(readFrom, lenBuff, 4);
 
-    //read if and while not enough data recieved, until all data arrives
+    //read if and while not enough data received, until all data arrives
     while (currentRead > 0 && totalRead < 4)
     {
-        currentRead = this -> recieveData(readFrom, (lenBuff + totalRead), (4 - totalRead));
+        currentRead = this -> receiveData(readFrom, (lenBuff + totalRead), (4 - totalRead));
         totalRead += currentRead;
     }
 
@@ -161,12 +161,12 @@ int TCP::recieveFramedData(SOCKET readFrom, char * data)
     //dataBuff = new char [lenPrefix];
 
     //priming read:
-    currentRead = totalRead = this->recieveData(readFrom, data, lenPrefix);
+    currentRead = totalRead = this->receiveData(readFrom, data, lenPrefix);
 
-    //read if and while not enough data recieved, until all data arrives
+    //read if and while not enough data received, until all data arrives
     while (currentRead > 0 && totalRead < lenPrefix)
     {
-        currentRead = this -> recieveData(readFrom, (data + totalRead), (lenPrefix - totalRead));
+        currentRead = this -> receiveData(readFrom, (data + totalRead), (lenPrefix - totalRead));
         totalRead += currentRead;
     }
 
