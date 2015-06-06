@@ -108,7 +108,7 @@ int main(int argc, char ** argv) {
         else {
           //handle the modifier
           for (int i = 0; i < NUM_MOD; i++) {
-            remote_user_input.ki.wVk = XTranslateModifier((x_key_received.modifier | MOD_KEYS[i]) & MOD_KEYS[i]);
+            remote_user_input.ki.wVk = XTranslateModifier((x_key_received.modifier ^ MOD_KEYS[i]) & MOD_KEYS[i]);
             SendVirtualKeyUp(remote_user_input);
           }
 
@@ -300,10 +300,17 @@ char XConvertKey(const uint16_t key) {
     case 0xff50:
       converted_key = VK_HOME;
       break;
-    case 0xffe2: //check if it is one of the modifier keys
+    case 0xffe1: //check if it is one of the modifier keys
+      converted_key = VK_SHIFT;
+      break;
     case 0xffe3:
-    case 0xffe4:
+      converted_key = VK_CONTROL;
+      break;
     case 0xffe9:
+      converted_key = VK_MENU;
+      break;
+    case 0xffe2:
+    case 0xffe4:
       converted_key = 0x97;
       break;
     case 0xffeb:
