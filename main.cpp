@@ -10,6 +10,12 @@
 #include <windows.h>
 #include <tcpipwin32.h>
 
+#define NUM_MOD 4
+#define SHIFT_MOD   0x01
+#define CONTROL_MOD 0x04
+#define MENU_MOD 0x08
+#define LWIN_MOD 0x40
+
 struct settings_t {
   int port;
   int tcp_socket;
@@ -42,6 +48,7 @@ int main(int argc, char ** argv) {
   settings.tcp_socket = 0;
   settings.enable_xtended_feat = false;
   x_key_received_t x_key_received;
+  char MOD_KEYS[NUM_MOD] = {SHIFT_MOD, CONTROL_MOD, MENU_MOD, LWIN_MOD};
 
   char key_received = 0x00;
 
@@ -83,8 +90,10 @@ int main(int argc, char ** argv) {
         if (x_key_received.key_press) {
           //handle the modifier
           if (x_key_received.modifier != 0) {
-            remote_user_input.ki.wVk = XTranslateModifier(x_key_received.modifier);
-            SendVirtualKeyHold(remote_user_input);
+            for (int i = 0; i < NUM_MOD; i++) {
+              remote_user_input.ki.wVk = XTranslateModifier(x_key_received.modifier & MOD_KEYS[i]);
+              SendVirtualKeyHold(remote_user_input);
+            }
           }
           std::cout << "modifier " << std::hex << (int) x_key_received.modifier << "\n";
 
@@ -98,8 +107,8 @@ int main(int argc, char ** argv) {
         //else if key_release
         else {
           //handle the modifier
-          if (x_key_received.modifier != 0) {
-            remote_user_input.ki.wVk = XTranslateModifier(x_key_received.modifier);
+          for (int i = 0; i < NUM_MOD; i++) {
+            remote_user_input.ki.wVk = XTranslateModifier((x_key_received.modifier | MOD_KEYS[i]) & MOD_KEYS[i]);
             SendVirtualKeyUp(remote_user_input);
           }
 
@@ -362,25 +371,17 @@ char XConvertKey(const uint16_t key) {
 char XTranslateModifier(char modifier) {
   char converted_key = 0;
   switch(modifier) {
-    case 0x01:
+    case SHIFT_MOD:
       converted_key = VK_SHIFT;
       break;
-    case 0x02:
-      break;
-    case 0x04:
+    case CONTROL_MOD:
       converted_key = VK_CONTROL;
       break;
-    case 0x08:
+    case MENU_MOD:
       converted_key = VK_MENU;
       break;
-    case 0x10:
-      break;
-    case 0x20:
-      break;
-    case 0x40:
+    case LWIN_MOD:
       converted_key = VK_LWIN;
-      break;
-    case 0x80:
       break;
   } //end switch
 
