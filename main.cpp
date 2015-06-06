@@ -97,10 +97,10 @@ int main(int argc, char ** argv) {
           }
           std::cout << "modifier " << std::hex << (int) x_key_received.modifier << "\n";
 
-            remote_user_input.ki.wVk = XConvertKey(x_key_received.key);
-            std::cout << "converted key " << std::hex << (uint8_t) XConvertKey(x_key_received.key) << "\n";
+          remote_user_input.ki.wVk = XConvertKey(x_key_received.key);
+          std::cout << "converted key " << std::hex << (uint8_t) XConvertKey(x_key_received.key) << "\n";
 
-            SendVirtualKeyHold(remote_user_input);
+          SendVirtualKeyHold(remote_user_input);
           std::cout << "press " << std::hex << x_key_received.key << "\n";
         } //end if (x_key_received.key_press)
 
@@ -300,58 +300,60 @@ char XConvertKey(const uint16_t key) {
     case 0xff50:
       converted_key = VK_HOME;
       break;
-    case 0xffe3: //check if it is one of the modifier keys
+    case 0xffe2: //check if it is one of the modifier keys
+    case 0xffe3:
+    case 0xffe4:
     case 0xffe9:
-        converted_key = 0x97;
-        break;
+      converted_key = 0x97;
+      break;
     case 0xffeb:
-        converted_key = VK_LWIN;
-        break;
+      converted_key = VK_LWIN;
+      break;
 
     case ';':
     case ':':
-        converted_key = VK_OEM_1;
-        break;
+      converted_key = VK_OEM_1;
+      break;
     case '-':
     case '_':
-        converted_key = VK_OEM_MINUS;
-        break;
+      converted_key = VK_OEM_MINUS;
+      break;
     case '+':
     case '=':
-        converted_key = VK_OEM_PLUS;
-        break;
+      converted_key = VK_OEM_PLUS;
+      break;
     case '/':
     case '?':
-        converted_key = VK_OEM_2;
-        break;
+      converted_key = VK_OEM_2;
+      break;
     case '`':
     case '~':
-        converted_key = VK_OEM_3;
-        break;
+      converted_key = VK_OEM_3;
+      break;
     case '.':
     case '>':
-        converted_key = VK_OEM_PERIOD;
-        break;
+      converted_key = VK_OEM_PERIOD;
+      break;
     case ',':
     case '<':
-        converted_key = VK_OEM_COMMA;
-        break;
+      converted_key = VK_OEM_COMMA;
+      break;
     case '[':
     case '{':
-        converted_key = VK_OEM_4;
-        break;
+      converted_key = VK_OEM_4;
+      break;
     case ']':
     case '}':
-        converted_key = VK_OEM_6;
-        break;
+      converted_key = VK_OEM_6;
+      break;
     case '\\':
     case '|':
-        converted_key = VK_OEM_5;
-        break;
+      converted_key = VK_OEM_5;
+      break;
     case '\'':
     case '"':
-        converted_key = VK_OEM_7;
-        break;
+      converted_key = VK_OEM_7;
+      break;
 
     default:
       //if (ispunct(key))
